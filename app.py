@@ -1,5 +1,5 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox, QHBoxLayout
+from langdetect import detect
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox, QHBoxLayout
 import os
 
 
@@ -89,7 +89,7 @@ class SummarizerApp(QWidget):
             mod.analyze(input_text, stop_words=nltk.corpus.stopwords.words('english'))
 
             result_text_se = mod.get_top_sentences(5)
-            if 'a' in input_text or 'b' in input_text or 'c' in input_text:
+            if detect(input_text) == 'en':
                 result_text_ml = self.ml_summary_en({"inputs": input_text})[0]['summary_text']
             else:
                 result_text_ml = self.ml_summary_ru({"inputs": input_text})[0]['summary_text']
