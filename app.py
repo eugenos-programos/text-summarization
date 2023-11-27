@@ -1,7 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox, QHBoxLayout
 import os
-from transformers import pipeline
 
 
 class SummarizerApp(QWidget):
@@ -11,7 +10,7 @@ class SummarizerApp(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('Текстовый Рефератор')
+        self.setWindowTitle('Text summarizer')
 
         self.text_edit = QTextEdit(self)
         self.result_label_se = QLabel(self)
@@ -20,13 +19,13 @@ class SummarizerApp(QWidget):
         self.result_label_ml = QLabel(self)
         self.result_label_ml.setWordWrap(True)
 
-        load_button = QPushButton('Загрузить текст', self)
-        summarize_button = QPushButton('Реферировать', self)
-        help_button = QPushButton('Помощь', self)
-        save_button_ml = QPushButton('Сохранить результат МО', self)
-        save_button_se = QPushButton('Сохранить результат SE', self)
+        load_button = QPushButton('Upload text', self)
+        summarize_button = QPushButton('Summarize', self)
+        help_button = QPushButton('Help', self)
+        save_button_ml = QPushButton('Save NN result', self)
+        save_button_se = QPushButton('Save SE result', self)
 
-        self.label = QLabel(f'<a href="None">Загрузите файл для кликабельности</a>', self)
+        self.label = QLabel(f'<a href="None">Upload file for clickability</a>', self)
         self.label.setOpenExternalLinks(True)
 
         load_button.clicked.connect(self.load_text)
@@ -72,7 +71,7 @@ class SummarizerApp(QWidget):
 
     def load_text(self):
         file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getOpenFileName(self, 'Открыть текстовый документ', filter='Text files (*.txt);;All Files (*)')
+        file_path, _ = file_dialog.getOpenFileName(self, 'Open text document', filter='Text files (*.txt);;All Files (*)')
 
         if file_path:
             with open(file_path, 'r', encoding='utf-8') as file:
@@ -89,7 +88,6 @@ class SummarizerApp(QWidget):
             mod = TextRank4Sentences()
             mod.analyze(input_text, stop_words=nltk.corpus.stopwords.words('english'))
 
-            # Форматирование результатов
             result_text_se = mod.get_top_sentences(5)
             if 'a' in input_text or 'b' in input_text or 'c' in input_text:
                 result_text_ml = self.ml_summary_en({"inputs": input_text})[0]['summary_text']
@@ -103,7 +101,7 @@ class SummarizerApp(QWidget):
         result_text = self.result_label_se.text()
 
         file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getSaveFileName(self, 'Сохранить результат', filter='Text files (*.txt);;All Files (*)')
+        file_path, _ = file_dialog.getSaveFileName(self, 'Save result', filter='Text files (*.txt);;All Files (*)')
 
         if file_path:
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -113,27 +111,15 @@ class SummarizerApp(QWidget):
         result_text = self.result_label_ml.text()
 
         file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getSaveFileName(self, 'Сохранить результат', filter='Text files (*.txt);;All Files (*)')
+        file_path, _ = file_dialog.getSaveFileName(self, 'Save result', filter='Text files (*.txt);;All Files (*)')
 
         if file_path:
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(result_text)
 
     def help(self):
-        help_text = "Данное приложение предназначено для автоматического реферирования текстовых документов. " \
-                    "Шаги:\n1. Загрузите текстовый документ.\n2. Нажмите 'Реферировать' для получения реферата.\n" \
-                    "3. Результат отобразится в окне, где вы можете сохранить его."
+        help_text = "This app is used for automatic text documents summarization. " \
+                    "Steps:\n1. Upload text file.\n2. Click on 'summarize' for summarization.\n" \
+                    "3. The result will be displayed in window where you can save it."
 
         QMessageBox.information(self, 'Help', help_text)
-
-if __name__ == '__main__':
-    import en_core_web_sm
-    nlp = en_core_web_sm.load()
-    import nltk
-    nltk.download('stopwords')
-    nltk.download('wordnet')
-    nltk.download('punkt')
-    app = QApplication(sys.argv)
-    summarizer_app = SummarizerApp()
-    summarizer_app.show()
-    sys.exit(app.exec_())
