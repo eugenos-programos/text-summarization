@@ -6,6 +6,7 @@ __pycache__/
 
 # local
 *.txt
+!requirements.txt
 
 # C extensions
 *.so
