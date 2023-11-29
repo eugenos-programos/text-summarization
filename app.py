@@ -1,6 +1,7 @@
 from langdetect import detect
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox, QHBoxLayout
 import os
+from keyword_summarization import get_summary, generate_keyword_summary
 
 
 class SummarizerApp(QWidget):
@@ -19,30 +20,37 @@ class SummarizerApp(QWidget):
         self.result_label_ml = QLabel(self)
         self.result_label_ml.setWordWrap(True)
 
+        self.result_label_keyword = QLabel(self)
+        self.result_label_keyword.setWordWrap(True)
+
         load_button = QPushButton('Upload text', self)
         summarize_button = QPushButton('Summarize', self)
         help_button = QPushButton('Help', self)
         save_button_ml = QPushButton('Save NN result', self)
         save_button_se = QPushButton('Save SE result', self)
+        save_button_keyword = QPushButton('Save keyword result', self)
 
-        self.label = QLabel(f'<a href="None">Upload file for clickability</a>', self)
-        self.label.setOpenExternalLinks(True)
+        self.file_label = QLabel(f'<a href="None">Upload file for clickability</a>', self)
+        self.file_label.setOpenExternalLinks(True)
 
         load_button.clicked.connect(self.load_text)
         summarize_button.clicked.connect(self.summarize_text)
         save_button_ml.clicked.connect(self.save_result_ml)
         save_button_se.clicked.connect(self.save_result_se)
+        save_button_keyword.clicked.connect(self.save_result_keyword)
         help_button.clicked.connect(self.help)
 
         vbox = QVBoxLayout()
         vbox.addWidget(load_button)
-        vbox.addWidget(self.label)
+        vbox.addWidget(self.file_label)
         vbox.addWidget(self.text_edit)
         vbox.addWidget(summarize_button)
         vbox.addWidget(self.result_label_se)
         vbox.addWidget(self.result_label_ml)
+        vbox.addWidget(self.result_label_keyword)
         vbox.addWidget(save_button_se)
         vbox.addWidget(save_button_ml)
+        vbox.addWidget(save_button_keyword)
         vbox.addWidget(help_button)
 
         self.setLayout(vbox)
@@ -76,7 +84,7 @@ class SummarizerApp(QWidget):
         if file_path:
             with open(file_path, 'r', encoding='utf-8') as file:
                 text = file.read()
-                self.label.setText(f'<a href="{self.create_file_link(file_path)}">{file_path}</a>')
+                self.file_label.setText(f'<a href="{self.create_file_link(file_path)}">{file_path}</a>')
                 self.text_edit.setPlainText(text)
 
     def summarize_text(self):
@@ -94,8 +102,10 @@ class SummarizerApp(QWidget):
             else:
                 result_text_ml = self.ml_summary_ru({"inputs": input_text})[0]['summary_text']
 
+
             self.result_label_se.setText('.'.join(result_text_se))
             self.result_label_ml.setText(f"___________\n{result_text_ml}")
+            self.result_label_keyword.setText(f"_________\n{get_summary(generate_keyword_summary(input_text))}")
 
     def save_result_se(self):
         result_text = self.result_label_se.text()
@@ -109,6 +119,16 @@ class SummarizerApp(QWidget):
 
     def save_result_ml(self):
         result_text = self.result_label_ml.text()
+
+        file_dialog = QFileDialog()
+        file_path, _ = file_dialog.getSaveFileName(self, 'Save result', filter='Text files (*.txt);;All Files (*)')
+
+        if file_path:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(result_text)
+
+    def save_result_keyword(self):
+        result_text = self.result_label_keyword.text()
 
         file_dialog = QFileDialog()
         file_path, _ = file_dialog.getSaveFileName(self, 'Save result', filter='Text files (*.txt);;All Files (*)')
