@@ -66,7 +66,10 @@ class SummarizerApp(QWidget):
         import requests
         API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
         headers = {"Authorization": "Bearer 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"}
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response_code = 404
+        while response_code != 200:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            response_code = response.status_code
         return response.json()
     
     @staticmethod
@@ -74,7 +77,10 @@ class SummarizerApp(QWidget):
         import requests
         API_URL = "https://api-inference.huggingface.co/models/csebuetnlp/mT5_multilingual_XLSum"
         headers = {"Authorization": "Bearer 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"}
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response_code = 404
+        while response_code != 200:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            response_code = response.status_code
         return response.json()
 
     def load_text(self):
